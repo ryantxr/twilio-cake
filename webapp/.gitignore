@@ -1,5 +1,5 @@
 /vendor/*
 /config/app.php
-/config/twilio.php
+/config/local-twilio.php
 /tmp/*
 /logs/*
