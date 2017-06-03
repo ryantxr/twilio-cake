@@ -1,0 +1,25 @@
+#!/bin/bash
+
+canonicalize() {
+	NAME="$1"
+	if [ -f "$NAME" ]
+	then
+		DIR=$(dirname -- "$NAME")
+		NAME=$(cd -P "$DIR" > /dev/null && pwd -P)/$(basename -- "$NAME")
+	fi
+	while [ -h "$NAME" ]; do
+		DIR=$(dirname -- "$NAME")
+		SYM=$(readlink "$NAME")
+		NAME=$(cd "$DIR" > /dev/null && cd $(dirname -- "$SYM") > /dev/null && pwd)/$(basename -- "$SYM")
+	done
+	echo "$NAME"
+}
+
+BIN=$(dirname -- "$(canonicalize "$0")")
+APP=$(dirname "$BIN")
+if [[ "$1" == "down" ]]
+then
+	php "$BIN"/cake.php migrations rollback
+else
+	php "$BIN"/cake.php migrations migrate
+fi

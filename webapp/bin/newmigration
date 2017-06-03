@@ -1,0 +1,38 @@
+#!/bin/bash
+
+canonicalize() {
+	NAME="$1"
+	if [ -f "$NAME" ]
+	then
+		DIR=$(dirname -- "$NAME")
+		NAME=$(cd -P "$DIR" > /dev/null && pwd -P)/$(basename -- "$NAME")
+	fi
+	while [ -h "$NAME" ]; do
+		DIR=$(dirname -- "$NAME")
+		SYM=$(readlink "$NAME")
+		NAME=$(cd "$DIR" > /dev/null && cd $(dirname -- "$SYM") > /dev/null && pwd)/$(basename -- "$SYM")
+	done
+	echo "$NAME"
+}
+
+BIN=$(dirname -- "$(canonicalize "$0")")
+APP=$(dirname "$BIN")
+
+
+echo "Enter name of your migration in camel case like this MyNewTable"
+read migname
+
+
+if [[ "$migname" == "" ]]
+then
+	echo "Exiting"
+	exit
+fi
+
+echo "Making migration for" $migname
+echo $BIN/cake migrations create --template $APP/config/migration-template.php $migname
+php "$BIN"/cake.php migrations create --template $APP/config/migration-template.php $migname
+
+#exec php "$BIN"/cake.php migrations "$@"
+
+exit
